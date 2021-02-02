@@ -1,6 +1,6 @@
 ## Nightwatch UI Automation
 
-This is an automation project for Demo UI Yesy that uses a node testing framework called nightwatch to test the web application.
+This is an automation project for Demo UI  that uses a node testing framework called nightwatch to test the web application.
 
 [Nightwatch](http://nightwatchjs.org/)
 
