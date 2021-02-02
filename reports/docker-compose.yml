@@ -1,0 +1,69 @@
+#docker-compose file 
+#Pulls in the latest selenium hub, chrome and firefox nodes
+#To Run : docker-compose run --rm -T nightwatch
+#To stop : docker-compose down
+version: '3'
+services:
+  selenium_hub:
+    image: selenium/hub:latest
+    container_name: selenium_hub
+    ports:
+      - "4444:4444"
+    environment:
+      - GRID_TIMEOUT=120000
+      - GRID_BROWSER_TIMEOUT=120000
+      - GRID_THROW_ON_CAPABILITY_NOT_PRESENT=true
+      - TZ=America/Chicago
+
+  nodechrome:
+    image: selenium/node-chrome-debug
+    depends_on:
+      - selenium_hub
+    ports:
+      - 5900
+    environment:
+      - no_proxy=localhost
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSION=5
+      - TZ=America/Chicago
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./data/:/home/client-tests/data
+      - ./downloads:/home/seluser/Downloads
+
+  nodefirefox:
+    image: selenium/node-firefox:2.53.1-americium
+    depends_on:
+      - selenium_hub
+    ports:
+      - 5900
+    environment:
+      - no_proxy=localhost
+      - HUB_PORT_4444_TCP_ADDR=selenium_hub
+      - HUB_PORT_4444_TCP_PORT=4444
+      - NODE_MAX_INSTANCES=5
+      - NODE_MAX_SESSION=5
+      - TZ=America/Chicago
+    volumes:
+      - /dev/shm:/dev/shm
+      - ./data/:/home/client-tests/data
+      - ./downloads:/home/seluser/Downloads
+
+  nightwatchmpa:
+    build: .
+    links:
+      - selenium_hub
+      - nodechrome
+      - nodefirefox
+    volumes:
+      - ./downloads:/home/client-tests/downloads
+    environment:
+      selenium_hub: 4444
+      browser: $${browser}
+      env: $${env}
+      tagName: $${tagName}
+      testCase: $${testCase} 
+    expose:
+      - "4444"
